@@ -67,6 +67,7 @@
       padding: 16px;
       border-bottom: 1px solid #eee;
       background-color: #0a1543;
+      font-family: 'Poppins', sans-serif;
     }
     .chatbox-header img {
       height: 40px;
@@ -85,6 +86,7 @@
     .chatbox-body {
       padding: 0px 16px 16px 16px;
       background-color: #f9f9f9;
+      font-family: 'Poppins', sans-serif;
     }
     .chatbox-body p {
       font-size: 14px;
