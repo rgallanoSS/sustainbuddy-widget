@@ -35,6 +35,7 @@
       font-size: 14px;
       white-space: nowrap;
       z-index: 1001;
+      font-family: 'Poppins', sans-serif;
     }
     #chat-tooltip::after {
       content: '';
