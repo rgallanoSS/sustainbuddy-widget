@@ -340,51 +340,54 @@
 
   async function handleChat() {
     function formatAnswer(answer) {
-      function escapeHtml(html) {
-        return html.replace(/[&<>"']/g, function (ch) {
-          return {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#39;',
-          }[ch];
-        });
+  function escapeHtml(html) {
+    return html.replace(/[&<>"']/g, function (ch) {
+      return {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      }[ch];
+    });
+  }
+
+  function parseMarkdown(md) {
+    // Escape HTML
+    md = escapeHtml(md);
+
+    // Replace headers
+    md = md
+      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+      .replace(/^# (.+)$/gm, '<h1>$1</h1>');
+
+    // Bold and italics
+    md = md
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+    // Replace list items
+    md = md.replace(/^[-*+] (.+)$/gm, '<li>$1</li>');
+
+    // Wrap <li> blocks in <ul>
+    md = md.replace(/(<li>[\s\S]+?<\/li>)/g, function (match) {
+      // Only wrap if not already inside a <ul>
+      if (!/^<ul>/.test(match)) {
+        return '<ul>' + match + '</ul>';
       }
+      return match;
+    });
 
-      function parseMarkdown(md) {
-        // Replace headers
-        md = md
-          .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-          .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-          .replace(/^# (.+)$/gm, '<h1>$1</h1>');
+    // Add <p> around standalone paragraphs (excluding headings and lists)
+    md = md.replace(/^(?!<h\d>|<ul>|<li>|<strong>|<em>)(.+)$/gm, '<p>$1</p>');
 
-        // Replace bold and italics
-        md = md
-          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-          .replace(/\*(.*?)\*/g, '<em>$1</em>');
+    return md;
+  }
 
-        // Replace list items
-        md = md.replace(/^(\s*[-*+] .+)$/gm, '<li>$1</li>');
+  return parseMarkdown(answer);
+}
 
-        // Wrap consecutive <li> in a <ul>
-        md = md.replace(/(<li>[\s\S]*?<\/li>)/g, function (match) {
-          const items = match
-            .split(/<\/li>\s*<li>/)
-            .map(item => item.replace(/^<li>/, '').replace(/<\/li>$/, ''));
-          return '<ul><li>' + items.join('</li><li>') + '</li></ul>';
-        });
-
-        // 🔧 REMOVE leading dash from inside <li>
-        md = md.replace(/<li>\s*-\s*/g, '<li>');
-
-        // Add line breaks between paragraphs
-        md = md.replace(/\n{2,}/g, '<br><br>');
-
-        return md;
-      }
-      return parseMarkdown(escapeHtml(answer));
-    }
 
     const input = document.getElementById("userMessage");
     const messagesDiv = document.getElementById("chat-messages");
@@ -443,4 +446,5 @@
     }
   });
 })();
+
 
