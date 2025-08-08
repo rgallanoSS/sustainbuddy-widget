@@ -351,39 +351,47 @@
       }[ch];
     });
   }
-
   function parseMarkdown(md) {
-  // Escape HTML
+  function escapeHtml(html) {
+    return html.replace(/[&<>"']/g, function (ch) {
+      return {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      }[ch];
+    });
+  }
+
   md = escapeHtml(md);
 
-  // Replace headers
+  // Headings
   md = md
     .replace(/^### (.+)$/gm, '<h3>$1</h3>')
     .replace(/^## (.+)$/gm, '<h2>$1</h2>')
     .replace(/^# (.+)$/gm, '<h1>$1</h1>');
 
-  // Bold and italics
+  // Bold & Italic
   md = md
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.*?)\*/g, '<em>$1</em>');
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>');
 
-  // ✅ FIX: Strip leading `- ` or `* ` from list items BEFORE wrapping in <li>
-  md = md.replace(/^[-*+] (.+)$/gm, '<li>$1</li>');
-
-  // ✅ Wrap <li> blocks in <ul> if multiple items exist
-  md = md.replace(/(<li>[\s\S]+?<\/li>)/g, function (match) {
-    if (!/^<ul>/.test(match)) {
-      return '<ul>' + match + '</ul>';
-    }
-    return match;
+  // Convert lists (group consecutive lines starting with - or *)
+  md = md.replace(/((?:^[-*] .+(?:\r?\n|$))+)/gm, match => {
+    const items = match
+      .trim()
+      .split(/\r?\n/)
+      .map(line => line.replace(/^[-*] (.+)/, '<li>$1</li>'))
+      .join('');
+    return `<ul>${items}</ul>`;
   });
 
-  // Optional: Add paragraph tags for non-list, non-header text
-  md = md.replace(/^(?!<(ul|li|h[1-6]|strong|em)>)(.+)$/gm, '<p>$2</p>');
+  // Paragraphs (avoid wrapping existing tags)
+  md = md.replace(/^(?!<(ul|li|h[1-6]|strong|em|\/))(.*\S.*)$/gm, '<p>$2</p>');
 
   return md;
 }
-
     const input = document.getElementById("userMessage");
     const messagesDiv = document.getElementById("chat-messages");
     const message = input.value.trim();
@@ -441,6 +449,7 @@
     }
   });
 })();
+
 
 
 
