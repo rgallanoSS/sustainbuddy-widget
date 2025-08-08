@@ -1,5 +1,37 @@
 (function () {
   // Load Material Symbols
+  // === Minimal embedded Marked (https://github.com/markedjs/marked) ===
+const formatAnswer = (function () {
+  function escapeHtml(html) {
+    return html.replace(/[&<>"']/g, function (ch) {
+      return ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      })[ch];
+    });
+  }
+
+  function parseMarkdown(md) {
+    return md
+      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+      .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+      .replace(/^\s*[-*+] (.+)$/gm, '<li>$1</li>')
+      .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/\n{2,}/g, '<br><br>')
+      .replace(/\n/g, '<br>');
+  }
+
+  return function (answer) {
+    return parseMarkdown(escapeHtml(answer));
+  };
+})();
+
   const fontLink = document.createElement('link');
   fontLink.rel = 'stylesheet';
   fontLink.href = 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined';
@@ -319,7 +351,7 @@
       botMsg.classList.add("chat-message", "bot");
       botMsg.innerHTML = `
         <img class="avatar" src="https://images.squarespace-cdn.com/content/v1/6155b5bdada6ea1708c2c74d/1751606573741-P427HARG1DA38DZUMXHX/SustainBuddy%2Blogo%2Btransparent2.png" />
-        <div class="message-bubble">${response.answer}</div>
+        <div class="message-bubble">${formatAnswer(response.answer)}</div>
       `;
       messagesDiv.appendChild(botMsg);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -344,3 +376,4 @@
 
   document.getElementById("sendButton").addEventListener("click", handleChat);
 })();
+
