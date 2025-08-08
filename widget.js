@@ -342,29 +342,47 @@
     function formatAnswer(answer) {
       function escapeHtml(html) {
         return html.replace(/[&<>"']/g, function (ch) {
-          return ({
+          return {
             '&': '&amp;',
             '<': '&lt;',
             '>': '&gt;',
             '"': '&quot;',
             "'": '&#39;',
-          })[ch];
+          }[ch];
         });
       }
 
       function parseMarkdown(md) {
-        return md
+        // Replace headers
+        md = md
           .replace(/^### (.+)$/gm, '<h3>$1</h3>')
           .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-          .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-          .replace(/^\s*[-*+] (.+)$/gm, '<li>$1</li>')
-          .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
-          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-          .replace(/\*(.*?)\*/g, '<em>$1</em>')
-          .replace(/\n{2,}/g, '<br><br>')
-          .replace(/\n/g, '<br>');
-      }
+          .replace(/^# (.+)$/gm, '<h1>$1</h1>');
 
+        // Replace bold and italics
+        md = md
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+        // Replace list items
+        md = md.replace(/^(\s*[-*+] .+)$/gm, '<li>$1</li>');
+
+        // Wrap consecutive <li> in a <ul>
+        md = md.replace(/(<li>[\s\S]*?<\/li>)/g, function (match) {
+          const items = match
+            .split(/<\/li>\s*<li>/)
+            .map(item => item.replace(/^<li>/, '').replace(/<\/li>$/, ''));
+          return '<ul><li>' + items.join('</li><li>') + '</li></ul>';
+        });
+
+        // 🔧 REMOVE leading dash from inside <li>
+        md = md.replace(/<li>\s*-\s*/g, '<li>');
+
+        // Add line breaks between paragraphs
+        md = md.replace(/\n{2,}/g, '<br><br>');
+
+        return md;
+      }
       return parseMarkdown(escapeHtml(answer));
     }
 
@@ -425,3 +443,4 @@
     }
   });
 })();
+
