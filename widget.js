@@ -299,9 +299,7 @@
   container.innerHTML = html;
   document.body.appendChild(container);
 
-  // Logic & Chat functionality
-  const script = document.createElement("script");
-  script.textContent = `/const chatWidget = document.getElementById("chat-widget");
+  const chatWidget = document.getElementById("chat-widget");
   const introChatbox = document.getElementById("intro-chatbox");
   const minimizeBtn = document.getElementById("minimize-chatbox");
 
@@ -448,6 +446,5 @@
       handleChat();
     }
   });
-  `;
-  document.body.appendChild(script);
 })();
+
