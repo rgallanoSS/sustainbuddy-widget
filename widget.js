@@ -287,7 +287,7 @@
         </div>
         <div class="chatbox-input">
           <input type="text" id="userMessage" placeholder="Type your message..." />
-          <button id="sendButton" onclick="handleChat()">
+          <button id="sendButton">
             <span class="material-symbols-outlined send-icon">send</span>
           </button>
         </div>
@@ -439,7 +439,7 @@
       messagesDiv.appendChild(errorMsg);
     }
   }
-
+  document.getElementById('sendButton').addEventListener('click', handleChat);
   document.getElementById("userMessage").addEventListener("keypress", function (e) {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -447,5 +447,6 @@
     }
   });
 })();
+
 
 
