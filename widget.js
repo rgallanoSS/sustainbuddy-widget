@@ -1,7 +1,13 @@
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
-<!-- CHAT WIDGET -->
-<style>
-  #chat-widget {
+(function () {
+  // Inject Material Symbols font
+  const materialFont = document.createElement("link");
+  materialFont.href = "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined";
+  materialFont.rel = "stylesheet";
+  document.head.appendChild(materialFont);
+
+  // Inject styles
+  const style = document.createElement("style");
+  style.textContent = ` #chat-widget {
     position: fixed;
     bottom: 50px;
     right: 50px;
@@ -247,46 +253,55 @@
       opacity: 1;
     }
   }
-</style>
+  `;
+  document.head.appendChild(style);
 
-<div id="chat-widget">
-  <div id="chat-tooltip">Chat with us!</div>
-  <img
-    src="https://images.squarespace-cdn.com/content/v1/6155b5bdada6ea1708c2c74d/1751544084577-CVBYGXST5BFMV2IX2D4D/SustainBuddy%2Blogo%2Btransparent.png"
-    alt="Chat" />
-</div>
-
-<div id="intro-chatbox">
-  <button id="minimize-chatbox">&times;</button>
-  <div class="chatbox-header">
-    <img
-      src="https://images.squarespace-cdn.com/content/v1/6155b5bdada6ea1708c2c74d/1751606573741-P427HARG1DA38DZUMXHX/SustainBuddy%2Blogo%2Btransparent2.png"
-      alt="SustainBuddy">
-    <div>
-      <div class="title">Sustainbuddy</div>
-      <div class="subtitle">Your maritime sustainability partner</div>
+  // Create HTML container
+  const html = `
+    <div id="chat-widget">
+      <div id="chat-tooltip">Chat with us!</div>
+      <img
+        src="https://images.squarespace-cdn.com/content/v1/6155b5bdada6ea1708c2c74d/1751544084577-CVBYGXST5BFMV2IX2D4D/SustainBuddy%2Blogo%2Btransparent.png"
+        alt="Chat" />
     </div>
-  </div>
-  <div class="chatbox-body">
-    <div id="chat-messages">
-      <div class="chat-message bot">
-        <img class="avatar"
-          src="https://images.squarespace-cdn.com/content/v1/6155b5bdada6ea1708c2c74d/1751606573741-P427HARG1DA38DZUMXHX/SustainBuddy%2Blogo%2Btransparent2.png" />
-        <div class="message-bubble">Hi there 👋 I'm here to help with sustainability tools, regulations, and solutions.
-          Ask me anything.</div>
+
+    <div id="intro-chatbox">
+      <button id="minimize-chatbox">&times;</button>
+      <div class="chatbox-header">
+        <img
+          src="https://images.squarespace-cdn.com/content/v1/6155b5bdada6ea1708c2c74d/1751606573741-P427HARG1DA38DZUMXHX/SustainBuddy%2Blogo%2Btransparent2.png"
+          alt="SustainBuddy">
+        <div>
+          <div class="title">Sustainbuddy</div>
+          <div class="subtitle">Your maritime sustainability partner</div>
+        </div>
+      </div>
+      <div class="chatbox-body">
+        <div id="chat-messages">
+          <div class="chat-message bot">
+            <img class="avatar"
+              src="https://images.squarespace-cdn.com/content/v1/6155b5bdada6ea1708c2c74d/1751606573741-P427HARG1DA38DZUMXHX/SustainBuddy%2Blogo%2Btransparent2.png" />
+            <div class="message-bubble">Hi there 👋 I'm here to help with sustainability tools, regulations, and solutions.
+              Ask me anything.</div>
+          </div>
+        </div>
+        <div class="chatbox-input">
+          <input type="text" id="userMessage" placeholder="Type your message..." />
+          <button id="sendButton">
+            <span class="material-symbols-outlined send-icon">send</span>
+          </button>
+        </div>
       </div>
     </div>
-    <div class="chatbox-input">
-      <input type="text" id="userMessage" placeholder="Type your message..." />
-      <button id="sendButton" onclick="handleChat()">
-        <span class="material-symbols-outlined send-icon">send</span>
-      </button>
-    </div>
-  </div>
-</div>
+  `;
 
-<script>
-  const chatWidget = document.getElementById("chat-widget");
+  const container = document.createElement("div");
+  container.innerHTML = html;
+  document.body.appendChild(container);
+
+  // Logic & Chat functionality
+  const script = document.createElement("script");
+  script.textContent = `/const chatWidget = document.getElementById("chat-widget");
   const introChatbox = document.getElementById("intro-chatbox");
   const minimizeBtn = document.getElementById("minimize-chatbox");
 
@@ -350,7 +365,6 @@
       }
 
       function parseMarkdown(md) {
-
         md = escapeHtml(md);
 
         // Headings
@@ -364,22 +378,21 @@
           .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
           .replace(/\*(.+?)\*/g, '<em>$1</em>');
 
-        // Convert lists (group consecutive lines starting with - or *)
-        md = md.replace(/((?:^[-*] .+(?:\r?\n|$))+)/gm, match => {
-          const items = match
-            .trim()
-            .split(/\r?\n/)
-            .map(line => line.replace(/^[-*] (.+)/, '<li>$1</li>'))
-            .join('');
+        // Wrap bullet lists into <ul>
+        md = md.replace(/((?:^\s*[-*+] .+\n?)+)/gm, match => {
+          const items = match.trim().split(/\n/).map(line =>
+            line.replace(/^\s*[-*+] (.+)/, '<li>$1</li>')
+          ).join('');
           return `<ul>${items}</ul>`;
         });
 
-        // Paragraphs (avoid wrapping existing tags)
-        md = md.replace(/^(?!<(ul|li|h[1-6]|strong|em|\/))(.*\S.*)$/gm, '<p>$2</p>');
+        // Double line break to <br><br> (outside of lists)
+        md = md.replace(/\n{2,}/g, '<br><br>');
 
         return md;
       }
-      return parseMarkdown(escapeHtml(answer));
+
+      return parseMarkdown(answer);
     }
     const input = document.getElementById("userMessage");
     const messagesDiv = document.getElementById("chat-messages");
@@ -435,4 +448,6 @@
       handleChat();
     }
   });
-</script>
+  `;
+  document.body.appendChild(script);
+})();
