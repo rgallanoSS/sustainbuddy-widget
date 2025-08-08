@@ -287,7 +287,7 @@
         </div>
         <div class="chatbox-input">
           <input type="text" id="userMessage" placeholder="Type your message..." />
-          <button id="sendButton">
+          <button id="sendButton" onclick="handleChat()">
             <span class="material-symbols-outlined send-icon">send</span>
           </button>
         </div>
@@ -447,4 +447,5 @@
     }
   });
 })();
+
 
